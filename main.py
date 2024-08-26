@@ -7,6 +7,9 @@ clock = pygame.time.Clock()
 running = True
 
 font = pygame.font.Font('./LycheeSoda.ttf', 30)
+font2 = pygame.font.Font('./LycheeSoda.ttf', 64)
+
+scored_sound_effect = pygame.mixer.music.load('./scored.ogg')
 
 # surface variables
 PONG_RECT_WIDTH = 10
@@ -24,10 +27,8 @@ BALL_WIDTH_N_HEIGHT = 25
 
 
 MAX_BALL_VELOCITY = 10
-X_SPEED_NIG = 6
-SPED_NIG = 6
-Y_BALL_SPEED = SPED_NIG
-X_BALL_SPEED = X_SPEED_NIG
+Y_BALL_SPEED = 6
+X_BALL_SPEED = 6
 
 
 ball_surf = pygame.Surface((BALL_WIDTH_N_HEIGHT, BALL_WIDTH_N_HEIGHT))
@@ -46,6 +47,34 @@ def get_ceiling_ball_collisions(ballsp: float):
 scoreIncremented = False
 ball_collided = False
 
+scored_text = font2.render(f"", True, color='white',bgcolor= 'black')
+draw_timestamp = 0
+
+def draw_scored(isRightPaddle: bool):
+    global scored_text
+    global draw_timestamp
+    current_time = pygame.time.get_ticks()
+    draw_timestamp = pygame.time.get_ticks()
+    difference_in_time = current_time - draw_timestamp 
+    
+    
+    if isRightPaddle:
+        scored_text = font2.render(f"RIGHT SCORED!", True, color='white',bgcolor= 'black')
+    else:
+        scored_text = font2.render(f"LEFT SCORED!", True, color='white',bgcolor= 'black')
+
+def draw_over_scored():
+    global scored_text
+    global draw_timestamp
+
+    current_time = pygame.time.get_ticks()
+    difference_in_time = current_time - draw_timestamp 
+    print(difference_in_time)
+    if draw_timestamp == 0:
+        return None
+    if difference_in_time >= 1500:
+       scored_text = font2.render(f"", True, color='white',bgcolor= 'black')
+
 def get_x_collisions(selp: int):
     global left_score
     global right_score
@@ -53,6 +82,8 @@ def get_x_collisions(selp: int):
     if ball_rect.x + 3 >= 1280:
         ball_rect.x = 1280 / 2
         ball_rect.y = 720 / 2
+        pygame.mixer.music.play()
+        draw_scored(False)
         left_score += 1
         if not ball_collided:
             ball_collided = True
@@ -60,6 +91,8 @@ def get_x_collisions(selp: int):
         ball_rect.x = 1280 /2
         ball_rect.y = 720/2
         right_score += 1
+        draw_scored(True)
+        pygame.mixer.music.play()
         if not ball_collided: 
             ball_collided = True
 
@@ -107,32 +140,34 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-
-    
-
-
     screen.fill("black")
+    pygame.draw.rect(screen, 'white', (490, 220, 300, 300), 5)
+
+    draw_over_scored()
+    get_x_collisions(X_BALL_SPEED)
+
+    pygame.draw.line(screen, color='white', start_pos=((1280/2), 0), end_pos=((1280/2), 720), width=8)
+
     screen.blit(white_surf, white_rect_1)
     screen.blit(white_surf, white_rect_2)
+    screen.blit(scored_text, scored_text.get_rect(center= (640, 320)))
     screen.blit(ball_surf, ball_rect)
 
 
-    left_score_text = font.render(f"Score: {left_score}", True, color='white',bgcolor= 'black')
+
+    left_score_text = font.render(f"Left Score: {left_score}", True, color='white',bgcolor= 'black')
     left_score_rect = left_score_text.get_rect(center= (320, 30))
-    right_score_text = font.render(f"Score: {right_score}", True, color='white',bgcolor= 'black')
+    right_score_text = font.render(f"Right Score: {right_score}", True, color='white',bgcolor= 'black')
     right_score_rect = right_score_text.get_rect(center= (860, 30))
 
     screen.blit(left_score_text, left_score_rect)
     screen.blit(right_score_text, right_score_rect)
 
-    pygame.draw.line(screen, color='white', start_pos=((1280/2), 0), end_pos=((1280/2), 720), width=8)
     pygame.display.flip()
 
     Y_BALL_SPEED = get_ceiling_ball_collisions(Y_BALL_SPEED)
     
 
-
-    get_x_collisions(X_BALL_SPEED)
 
 
     if ball_rect.colliderect(white_rect_1):
