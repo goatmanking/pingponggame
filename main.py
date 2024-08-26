@@ -55,7 +55,7 @@ def draw_scored(isRightPaddle: bool):
     
     if isRightPaddle:
         scored_text = font2.render(f"RIGHT SCORED!", True, color='white',bgcolor= 'black')
-    else:
+    elif not isRightPaddle:
         scored_text = font2.render(f"LEFT SCORED!", True, color='white',bgcolor= 'black')
 
 def draw_over_scored():
@@ -130,10 +130,13 @@ def what_direction():
 
 pygame.display.set_caption("Ping Pong")
 
-
 # I do this here as it should run once and then the value should stay the same
 starting_y_direction = what_direction()
 starting_x_direction = what_direction()
+
+
+is_game_paused = False
+
 while running:
 
 
@@ -144,8 +147,9 @@ while running:
     screen.fill("black")
     pygame.draw.rect(screen, 'white', (490, 220, 300, 300), 5)
 
-    draw_over_scored()
     get_x_collisions()
+    # apparently I broke this idk why 
+    draw_over_scored()
 
     pygame.draw.line(screen, color='white', start_pos=((1280/2), 0), end_pos=((1280/2), 720), width=8)
 
@@ -164,11 +168,9 @@ while running:
     screen.blit(left_score_text, left_score_rect)
     screen.blit(right_score_text, right_score_rect)
 
-    pygame.display.flip()
 
     Y_BALL_SPEED = get_ceiling_ball_collisions(Y_BALL_SPEED)
     
-
 
 
     if ball_rect.colliderect(white_rect_1):
@@ -176,7 +178,7 @@ while running:
     elif ball_rect.colliderect(white_rect_2):
         check_ball_collisions(white_rect_2)
 
-    
+        
     if starting_y_direction:
         ball_rect.y += Y_BALL_SPEED
     else:
@@ -200,7 +202,7 @@ while running:
     if not white_rect_2.y <= 7.5:
         if keys[pygame.K_UP]:
             white_rect_2.y -= PONG_MOVE_SPEED
-    
+        
     
     pygame.display.flip()
     clock.tick(60)  
