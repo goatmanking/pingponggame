@@ -1,17 +1,20 @@
 import pygame
 import random
 
+# setup main game components
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
+# fonts
 font = pygame.font.Font('./LycheeSoda.ttf', 30)
 font2 = pygame.font.Font('./LycheeSoda.ttf', 64)
 
+# load sound effects
 scored_sound_effect = pygame.mixer.music.load('./scored.ogg')
 
-# surface variables
+# 'paddle' variables
 PONG_RECT_WIDTH = 10
 PONG_RECT_HEIGHT = 200
 PONG_MOVE_SPEED = 7
@@ -20,16 +23,12 @@ white_surf = pygame.Surface((PONG_RECT_WIDTH,PONG_RECT_HEIGHT))
 white_surf.fill("white")
 white_rect_1 = white_surf.get_frect(center = (5, 720/2))
 white_rect_2 = white_surf.get_frect(center = (1275, 720/2))
-hit_1st_surf = False
-hit_2nd_surf = False
-# ball surf my nigga
+
+# ping pong ball variables
 BALL_WIDTH_N_HEIGHT = 25
-
-
 MAX_BALL_VELOCITY = 10
 Y_BALL_SPEED = 6
 X_BALL_SPEED = 6
-
 
 ball_surf = pygame.Surface((BALL_WIDTH_N_HEIGHT, BALL_WIDTH_N_HEIGHT))
 ball_surf.fill('white')
@@ -37,6 +36,8 @@ ball_rect = ball_surf.get_frect(center = (1280/2, 720/2))
 left_score = 0
 right_score = 0
 
+
+# bounce ball if it hits the ceiling
 def get_ceiling_ball_collisions(ballsp: float):
     if ball_rect.y + 3 >= 720:
         ballsp *= -1
@@ -44,7 +45,6 @@ def get_ceiling_ball_collisions(ballsp: float):
         ballsp *= -1
     return ballsp
 
-scoreIncremented = False
 ball_collided = False
 
 scored_text = font2.render(f"", True, color='white',bgcolor= 'black')
@@ -52,11 +52,6 @@ draw_timestamp = 0
 
 def draw_scored(isRightPaddle: bool):
     global scored_text
-    global draw_timestamp
-    current_time = pygame.time.get_ticks()
-    draw_timestamp = pygame.time.get_ticks()
-    difference_in_time = current_time - draw_timestamp 
-    
     
     if isRightPaddle:
         scored_text = font2.render(f"RIGHT SCORED!", True, color='white',bgcolor= 'black')
@@ -69,13 +64,15 @@ def draw_over_scored():
 
     current_time = pygame.time.get_ticks()
     difference_in_time = current_time - draw_timestamp 
-    print(difference_in_time)
     if draw_timestamp == 0:
         return None
     if difference_in_time >= 1500:
        scored_text = font2.render(f"", True, color='white',bgcolor= 'black')
 
-def get_x_collisions(selp: int):
+
+
+# check if ball goes outside of the playing box then increment score
+def get_x_collisions():
     global left_score
     global right_score
     global ball_collided
@@ -95,13 +92,6 @@ def get_x_collisions(selp: int):
         pygame.mixer.music.play()
         if not ball_collided: 
             ball_collided = True
-
-def what_direction():
-        rand_choice_list = ["-", "+"]
-        if random.choice(rand_choice_list) == "-":
-            return True
-        elif random.choice(rand_choice_list) == "+":
-            return False
 
 def check_ball_collisions(surf):
 
@@ -128,11 +118,22 @@ def check_ball_collisions(surf):
         print("uhhh sussy")
 
 
+def what_direction():
+        rand_choice_list = ["-", "+"]
+        if random.choice(rand_choice_list) == "-":
+            return True
+        elif random.choice(rand_choice_list) == "+":
+            return False
+        else:
+            return False
+
 
 pygame.display.set_caption("Ping Pong")
 
 
-starting_direction = what_direction()
+# I do this here as it should run once and then the value should stay the same
+starting_y_direction = what_direction()
+starting_x_direction = what_direction()
 while running:
 
 
@@ -144,7 +145,7 @@ while running:
     pygame.draw.rect(screen, 'white', (490, 220, 300, 300), 5)
 
     draw_over_scored()
-    get_x_collisions(X_BALL_SPEED)
+    get_x_collisions()
 
     pygame.draw.line(screen, color='white', start_pos=((1280/2), 0), end_pos=((1280/2), 720), width=8)
 
@@ -176,9 +177,15 @@ while running:
         check_ball_collisions(white_rect_2)
 
     
+    if starting_y_direction:
+        ball_rect.y += Y_BALL_SPEED
+    else:
+        ball_rect.y -= Y_BALL_SPEED
+    if starting_x_direction:
+        ball_rect.x += X_BALL_SPEED
+    else: 
+        ball_rect.x -= X_BALL_SPEED
 
-    ball_rect.y += Y_BALL_SPEED
-    ball_rect.x -= X_BALL_SPEED
 
     keys = pygame.key.get_pressed()
     if not  white_rect_1.y <= 7.5:
