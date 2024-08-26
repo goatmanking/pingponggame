@@ -6,8 +6,7 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-font = pygame.font.Font(pygame.font.get_default_font(), 32)
-font.set_bold(True)
+font = pygame.font.Font('./LycheeSoda.ttf', 30)
 
 # surface variables
 PONG_RECT_WIDTH = 10
@@ -34,7 +33,8 @@ X_BALL_SPEED = X_SPEED_NIG
 ball_surf = pygame.Surface((BALL_WIDTH_N_HEIGHT, BALL_WIDTH_N_HEIGHT))
 ball_surf.fill('white')
 ball_rect = ball_surf.get_frect(center = (1280/2, 720/2))
-score = 0
+left_score = 0
+right_score = 0
 
 def get_ceiling_ball_collisions(ballsp: float):
     if ball_rect.y + 3 >= 720:
@@ -47,18 +47,19 @@ scoreIncremented = False
 ball_collided = False
 
 def get_x_collisions(selp: int):
-    global score
+    global left_score
+    global right_score
     global ball_collided
     if ball_rect.x + 3 >= 1280:
         ball_rect.x = 1280 / 2
         ball_rect.y = 720 / 2
-        score += 1
+        left_score += 1
         if not ball_collided:
             ball_collided = True
     elif ball_rect.x - 3 <= 0:
         ball_rect.x = 1280 /2
         ball_rect.y = 720/2
-        score += 1
+        right_score += 1
         if not ball_collided: 
             ball_collided = True
 
@@ -116,10 +117,14 @@ while running:
     screen.blit(ball_surf, ball_rect)
 
 
-    text = font.render(f"Score: {score}", True, color='purple',bgcolor= 'white')
-    text_rect = text.get_rect(center= (640, 30))
+    left_score_text = font.render(f"Score: {left_score}", True, color='white',bgcolor= 'black')
+    left_score_rect = left_score_text.get_rect(center= (320, 30))
+    right_score_text = font.render(f"Score: {right_score}", True, color='white',bgcolor= 'black')
+    right_score_rect = right_score_text.get_rect(center= (860, 30))
 
-    screen.blit(text, text_rect)
+    screen.blit(left_score_text, left_score_rect)
+    screen.blit(right_score_text, right_score_rect)
+
     pygame.draw.line(screen, color='white', start_pos=((1280/2), 0), end_pos=((1280/2), 720), width=8)
     pygame.display.flip()
 
